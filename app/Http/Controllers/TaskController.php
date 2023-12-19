@@ -44,4 +44,9 @@ class TaskController extends Controller
     {
         return $service->deleteById($id, auth()->user());
     }
+
+    public function complete(TaskService $service, int $id): Task
+    {
+        return $service->completeById($id, auth()->user());
+    }
 }

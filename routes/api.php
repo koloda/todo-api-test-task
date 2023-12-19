@@ -24,5 +24,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/tasks', [\App\Http\Controllers\TaskController::class, 'store']);
     Route::put('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'update']);
     Route::delete('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'destroy']);
-    Route::post('/tasks/{id}/done', [\App\Http\Controllers\TaskController::class, 'done']);
+    Route::post('/tasks/{id}/complete', [\App\Http\Controllers\TaskController::class, 'complete']);
 });

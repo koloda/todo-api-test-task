@@ -5,19 +5,19 @@ namespace App\Services;
 use App\Http\Requests\CreateTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
+use App\Models\TaskStatus;
 use App\Models\User;
 use App\Repositories\TaskRepository;
 
 class TaskService
 {
-    public function __construct(private TaskRepository $repository)
+    public function __construct(private readonly TaskRepository $repository)
     {}
 
     public function createFromRequest(CreateTaskRequest $request, User $user): Task
     {
         $payload = $request->toDTO();
 
-        //check for parent task
         if ($payload->parentId) {
             $parent = $this->repository->getById($payload->parentId);
 
@@ -26,7 +26,16 @@ class TaskService
             }
         }
 
-        return $this->repository->create($payload, $user);
+        $task = new Task();
+        $task->title = $payload->title;
+        $task->description = $payload->description;
+        $task->userId = $user->id;
+        $task->parentId = $payload->parentId;
+        $task->priority = $payload->priority;
+        $task->status = TaskStatus::Todo;
+        $task->save();
+
+        return $task;
     }
 
     public function updateFromRequest(UpdateTaskRequest $request, User $user, int $id): Task
@@ -38,7 +47,12 @@ class TaskService
             abort(404);
         }
 
-        return $this->repository->update($payload, $task);
+        $task->title = $payload->title;
+        $task->description = $payload->description;
+        $task->priority = $payload->priority;
+        $task->save();
+
+        return $task;
     }
 
     public function deleteById(int $id, User $user): bool|null
@@ -49,6 +63,30 @@ class TaskService
             abort(404);
         }
 
-        return $this->repository->delete($task);
+        return $task->delete();
+    }
+
+    public function completeById(int $id, User $user): Task
+    {
+        $task = $this->repository->getById($id);
+
+        if ($task->userId !== $user->id) {
+            abort(404);
+        }
+
+        if ($task->status === TaskStatus::Done) {
+            abort(400);
+        }
+
+        foreach($this->repository->getFlatSubtasksList($task) as $subtask) {
+            if ($subtask->status !== TaskStatus::Done) {
+                abort(400);
+            }
+        }
+
+        $task->status = TaskStatus::Done;
+        $task->save();
+
+        return $task;
     }
 }

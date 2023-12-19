@@ -19,7 +19,6 @@ class CreateTaskRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'required|integer|between:1,5',
-            'status' => 'required|string|in:todo,done',
             'parentId' => 'nullable|integer|exists:tasks,id',
         ];
     }
@@ -29,7 +28,6 @@ class CreateTaskRequest extends FormRequest
         return new CreateTaskDTO(
             title: $this->input('title'),
             priority: $this->input('priority'),
-            status: TaskStatus::from($this->input('status')),
             description: $this->input('description'),
             parentId: $this->input('parentId'),
         );

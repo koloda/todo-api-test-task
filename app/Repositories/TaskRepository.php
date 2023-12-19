@@ -20,32 +20,14 @@ class TaskRepository
         return Task::query()->where('userId', $user->id)->with('allSubtasks')->get();
     }
 
-    public function create(CreateTaskDTO $payload, User $user): Task
+    public function getFlatSubtasksList(Task $task): array
     {
-        $task = new Task();
-        $task->title = $payload->title;
-        $task->description = $payload->description;
-        $task->userId = $user->id;
-        $task->parentId = $payload->parentId;
-        $task->priority = $payload->priority;
-        $task->status = $payload->status;
-        $task->save();
+        $subtasks = [];
+        foreach ($task->subtasks()->get() as $subtask) {
+            $subtasks[] = $subtask;
+            $subtasks = array_merge($subtasks, $this->getFlatSubtasksList($subtask));
+        }
 
-        return $task;
-    }
-
-    public function update(UpdateTaskDTO $payload, Task $task): Task
-    {
-        $task->title = $payload->title;
-        $task->description = $payload->description;
-        $task->priority = $payload->priority;
-        $task->save();
-
-        return $task;
-    }
-
-    public function delete(Task $task): bool|null
-    {
-        return $task->delete();
+        return $subtasks;
     }
 }
