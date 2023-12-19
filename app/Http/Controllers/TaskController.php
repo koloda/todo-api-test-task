@@ -30,19 +30,18 @@ class TaskController extends Controller
         return $task;
     }
 
-    public function store(TaskService $service, CreateTaskRequest $request)
+    public function store(TaskService $service, CreateTaskRequest $request): Task
     {
-        return response()->json(
-            $service->createFromRequest($request, auth()->user()),
-            201
-        );
+        return $service->createFromRequest($request, auth()->user());
     }
 
-    public function update(TaskService $service, UpdateTaskRequest $request, int $id)
+    public function update(TaskService $service, UpdateTaskRequest $request, int $id): Task
     {
-        return response()->json(
-            $service->updateFromRequest($request, auth()->user(), $id),
-            200
-        );
+        return $service->updateFromRequest($request, auth()->user(), $id);
+    }
+
+    public function destroy(TaskService $service, int $id): bool|null
+    {
+        return $service->deleteById($id, auth()->user());
     }
 }

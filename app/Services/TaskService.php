@@ -40,4 +40,15 @@ class TaskService
 
         return $this->repository->update($payload, $task);
     }
+
+    public function deleteById(int $id, User $user): bool|null
+    {
+        $task = $this->repository->getById($id);
+
+        if ($task->userId !== $user->id) {
+            abort(404);
+        }
+
+        return $this->repository->delete($task);
+    }
 }
