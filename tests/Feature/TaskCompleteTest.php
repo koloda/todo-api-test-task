@@ -5,8 +5,6 @@ namespace Tests\Feature;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class TaskCompleteTest extends TestCase
@@ -25,7 +23,10 @@ class TaskCompleteTest extends TestCase
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,
             'status' => TaskStatus::Todo,
+            'completedAt' => null,
         ]);
+
+        $when = now();
 
         $this->actingAs($user)
             ->postJson('/api/tasks/' . $task->id . '/complete')
@@ -34,6 +35,7 @@ class TaskCompleteTest extends TestCase
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,
             'status' => TaskStatus::Done,
+            'completedAt' => '>= ' . $when->format('Y-m-d H:i:s'),
         ]);
     }
 

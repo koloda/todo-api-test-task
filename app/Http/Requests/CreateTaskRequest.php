@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\DTO\CreateTaskDTO;
-use App\Models\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateTaskRequest extends FormRequest

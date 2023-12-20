@@ -16,6 +16,7 @@ class TaskIndexTest extends TestCase
      */
     public function test_list_user_tasks()
     {
+        Task::query()->whereNotNull('id')->delete();
         $user = User::factory()->create();
         Task::factory()->count(5)->create(['userId' => $user->id]);
         $secondUser = User::factory()->create();

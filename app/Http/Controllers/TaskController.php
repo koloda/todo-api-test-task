@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateTaskRequest;
+use App\Http\Requests\TaskIndexRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
 use App\Repositories\TaskRepository;
 use App\Services\TaskService;
-use Illuminate\Database\Eloquent\Collection;
 
 class TaskController extends Controller
 {
-    public function index(TaskRepository $repository): Collection
+    public const TASKS_PER_PAGE = 100;
+
+    public function index(TaskRepository $repository, TaskIndexRequest $request)
     {
         $user = auth()->user();
+        $filter = $request->toDTO();
 
-        return $repository->getByUser($user)->get();
+        return $repository->getByUser($user, $filter)->get();
     }
 
     public function show(TaskRepository $repository, int $id): Task

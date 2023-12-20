@@ -2,11 +2,11 @@
 
 namespace App\Repositories;
 
-use App\DTO\CreateTaskDTO;
-use App\DTO\UpdateTaskDTO;
+use App\DTO\TaskIndexFilterDTO;
+use App\Http\Requests\TaskOrder;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class TaskRepository
 {
@@ -15,9 +15,41 @@ class TaskRepository
         return Task::query()->with('subtasks')->findOrFail($id);
     }
 
-    public function getByUser(User $user): Collection
+    public function getByUser(User $user, ?TaskIndexFilterDTO $filter): Builder
     {
-        return Task::query()->where('userId', $user->id)->with('allSubtasks')->get();
+        $query = Task::query()->where('userId', $user->id)->with('subtasks');
+        if ($filter) {
+            $query = $this->applyFilter($query, $filter);
+        }
+
+        return $query;
+    }
+
+    private function applyFilter(Builder $query, TaskIndexFilterDTO $filter): Builder
+    {
+        if ($filter->status) {
+            $query->where('status', $filter->status->value);
+        }
+
+        if ($filter->priority) {
+            $query->where('priority', $filter->priority);
+        }
+
+        if ($filter->text) {
+            $query->where(function (Builder $query) use ($filter) {
+                $query->whereFullText('title', $filter->text)
+                    ->orWhereFullText('description', $filter->text);
+            });
+        }
+
+        if ($filter->order) {
+            foreach ($filter->order as $orderOption) {
+                /** @var TaskOrder $orderOption */
+                $query->orderByRaw($orderOption->toSql());
+            }
+        }
+
+        return $query;
     }
 
     public function getFlatSubtasksList(Task $task): array

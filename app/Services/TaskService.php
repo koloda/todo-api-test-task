@@ -9,10 +9,11 @@ use App\Models\TaskStatus;
 use App\Models\User;
 use App\Repositories\TaskRepository;
 
-class TaskService
+readonly class TaskService
 {
-    public function __construct(private readonly TaskRepository $repository)
-    {}
+    public function __construct(private TaskRepository $repository)
+    {
+    }
 
     public function createFromRequest(CreateTaskRequest $request, User $user): Task
     {
@@ -55,7 +56,7 @@ class TaskService
         return $task;
     }
 
-    public function deleteById(int $id, User $user): bool|null
+    public function deleteById(int $id, User $user): ?bool
     {
         $task = $this->repository->getById($id);
 
@@ -78,13 +79,14 @@ class TaskService
             abort(400);
         }
 
-        foreach($this->repository->getFlatSubtasksList($task) as $subtask) {
+        foreach ($this->repository->getFlatSubtasksList($task) as $subtask) {
             if ($subtask->status !== TaskStatus::Done) {
                 abort(400);
             }
         }
 
         $task->status = TaskStatus::Done;
+        $task->completedAt = now();
         $task->save();
 
         return $task;

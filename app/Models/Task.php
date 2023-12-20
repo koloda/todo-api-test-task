@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int userId
  * @property int priority
  * @property TaskStatus status
+ * @property Carbon createdAt
  */
 class Task extends Model
 {
@@ -25,15 +26,13 @@ class Task extends Model
 
     protected $casts = [
         'status' => TaskStatus::class,
+        'completedAt' => 'datetime:Y-m-d H:i:s',
     ];
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     public function subtasks(): HasMany
     {
         return $this->hasMany(Task::class, 'parentId')->with('subtasks');
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'userId');
     }
 }

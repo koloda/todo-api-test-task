@@ -9,5 +9,6 @@ class CreateTaskDTO
         public int $priority,
         public ?string $description,
         public ?int $parentId,
-    ) {}
+    ) {
+    }
 }
