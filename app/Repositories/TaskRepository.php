@@ -37,8 +37,7 @@ class TaskRepository
 
         if ($filter->text) {
             $query->where(function (Builder $query) use ($filter) {
-                $query->whereFullText('title', $filter->text)
-                    ->orWhereFullText('description', $filter->text);
+                $query->whereFullText(['title', 'description'], $filter->text);
             });
         }
 

@@ -6,7 +6,10 @@ use App\DTO\TaskIndexFilterDTO;
 use App\Models\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use OpenApi\Attributes as OA;
 
+#[OA\RequestBody(request: 'TaskIndexRequest', description: 'Task index filter', required: false, content: new OA\MediaType(mediaType: 'application/x-www-form-urlencoded', schema: new OA\Schema(ref: '#/components/schemas/TaskIndexRequest')))]
+#[OA\Schema(schema: 'TaskIndexRequest')]
 class TaskIndexRequest extends FormRequest
 {
     /**
@@ -14,6 +17,10 @@ class TaskIndexRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+    #[OA\Property(property: 'status', description: 'Filter parameter for status(todo, done)', type: 'string', enum: [TaskStatus::Todo, TaskStatus::Done])]
+    #[OA\Property(property: 'priority', description: 'Filter parameter for priority (1..5)', type: 'integer', maximum: 5, minimum: 1)]
+    #[OA\Property(property: 'text', description: 'Filter parameter for text (search in title and description)', type: 'string')]
+    #[OA\Property(property: 'order', description: 'Order parameter (priority.asc, priority.desc, createdAt.asc, createdAt.desc, completedAt.asc, completedAt.desc). Possible to use 2 order params separated by comma, like: order=priority.asc,completedAt.desc', type: 'string')]
     public function rules(): array
     {
         return [

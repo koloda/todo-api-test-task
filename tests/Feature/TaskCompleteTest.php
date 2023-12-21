@@ -26,17 +26,13 @@ class TaskCompleteTest extends TestCase
             'completedAt' => null,
         ]);
 
-        $when = now();
-
         $this->actingAs($user)
             ->postJson('/api/tasks/' . $task->id . '/complete')
             ->assertStatus(200);
 
-        $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
-            'status' => TaskStatus::Done,
-            'completedAt' => '>= ' . $when->format('Y-m-d H:i:s'),
-        ]);
+        $task->refresh();
+        $this->assertEquals(TaskStatus::Done, $task->status);
+        $this->assertNotNull($task->completedAt);
     }
 
     public function test_complete_task_with_subtask()
@@ -60,15 +56,13 @@ class TaskCompleteTest extends TestCase
             ->postJson('/api/tasks/' . $task->id . '/complete')
             ->assertStatus(200);
 
-        $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
-            'status' => TaskStatus::Done,
-        ]);
+        $task->refresh();
+        $this->assertEquals(TaskStatus::Done, $task->status);
+        $this->assertNotNull($task->completedAt);
 
-        $this->assertDatabaseHas('tasks', [
-            'id' => $subtask->id,
-            'status' => TaskStatus::Done,
-        ]);
+        $subtask->refresh();
+        $this->assertEquals(TaskStatus::Done, $subtask->status);
+        $this->assertNotNull($subtask->completedAt);
     }
 
     public function test_cannot_complete_tasks_with_not_completed_subtasks()

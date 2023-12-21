@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
     {
         \App\Models\User::factory(10)->create();
 
-        \App\Models\Task::factory(1000)->create(['userId' => \App\Models\User::query()->inRandomOrder()->first()->id]);
+        foreach (\App\Models\User::all() as $user) {
+            \App\Models\Task::factory(20)->create(['userId' => $user->id]);
+        }
     }
 }

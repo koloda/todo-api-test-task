@@ -1,0 +1,214 @@
+openapi: 3.0.0
+info:
+  title: 'Task API'
+  version: '0.1'
+servers:
+  -
+    url: /api
+paths:
+  /tasks:
+    get:
+      tags:
+        - Tasks
+      summary: 'Get list of tasks'
+      operationId: 6a93d54730cde509d735e538ab6800f6
+      requestBody:
+        $ref: '#/components/requestBodies/TaskIndexRequest'
+      responses:
+        '200':
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+              example:
+                -
+                  id: 1
+                  parentId: null
+                  userId: 1
+                  title: 'Task 1'
+                  description: 'Description 1'
+                  priority: 3
+                  status: todo
+                  createdAt: '2021-01-01 00:00:00'
+                  updatedAt: '2021-01-01 00:00:00'
+                  completedAt: null
+                  subtasks: [{ id: 2, parentId: 1, userId: 1, title: 'Task 2', description: 'Description 2', priority: 2, status: done, createdAt: '2021-01-01 00:00:00', updatedAt: '2021-01-01 00:00:00', completedAt: '2021-01-01 00:00:00', subtasks: [] }]
+    post:
+      tags:
+        - Tasks
+      summary: 'Create task'
+      operationId: 9b481c0ed5fdfa1a592d70ba39a348ee
+      requestBody:
+        $ref: '#/components/requestBodies/CreateTaskRequest'
+      responses:
+        '201':
+          $ref: '#/components/schemas/Task'
+  '/tasks/{id}':
+    get:
+      tags:
+        - Tasks
+      summary: 'Get task by ID'
+      operationId: fd3677b5b24695d7b801715869b1357c
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Task ID'
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/schemas/Task'
+    put:
+      tags:
+        - Tasks
+      summary: 'Update task'
+      operationId: 85377ff0e935f093dd75ea6886923dbc
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Task ID'
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateTaskRequest'
+      responses:
+        '200':
+          $ref: '#/components/schemas/Task'
+    delete:
+      tags:
+        - Tasks
+      summary: 'Delete task'
+      operationId: 5ed5dfd4c645e9398f4282969bfe6478
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Task ID'
+          required: true
+      responses:
+        '204':
+          description: 'No content'
+  '/tasks/{id}/complete':
+    post:
+      tags:
+        - Tasks
+      summary: 'Complete task'
+      operationId: 51a2778a766878fd33b5e7dad81f323c
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'Task ID'
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/schemas/Task'
+components:
+  schemas:
+    CreateTaskRequest:
+      properties:
+        title:
+          description: 'Task title'
+          type: string
+        description:
+          description: 'Task description'
+          type: string
+        priority:
+          description: 'Task priority (1..5)'
+          type: integer
+          maximum: 5
+          minimum: 1
+        parentId:
+          description: 'Parent task ID'
+          type: integer
+      type: object
+    TaskIndexRequest:
+      properties:
+        status:
+          description: 'Filter parameter for status(todo, done)'
+          type: string
+          enum:
+            - todo
+            - done
+        priority:
+          description: 'Filter parameter for priority (1..5)'
+          type: integer
+          maximum: 5
+          minimum: 1
+        text:
+          description: 'Filter parameter for text (search in title and description)'
+          type: string
+        order:
+          description: 'Order parameter (priority.asc, priority.desc, createdAt.asc, createdAt.desc, completedAt.asc, completedAt.desc). Possible to use 2 order params separated by comma, like: order=priority.asc,completedAt.desc'
+          type: string
+      type: object
+    UpdateTaskRequest:
+      properties:
+        title:
+          description: 'Task title'
+          type: string
+        description:
+          description: 'Task description'
+          type: string
+        priority:
+          description: 'Task priority (1..5)'
+          type: integer
+          maximum: 5
+          minimum: 1
+      type: object
+    Task:
+      properties:
+        id:
+          type: integer
+        parentId:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: integer
+        status:
+          type: string
+          enum:
+            - todo
+            - done
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        subtasks:
+          $ref: '#/components/schemas/Task'
+      type: object
+  requestBodies:
+    CreateTaskRequest:
+      description: 'Create task'
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/CreateTaskRequest'
+    TaskIndexRequest:
+      description: 'Task index filter'
+      required: false
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/TaskIndexRequest'
+    UpdateTaskRequest:
+      description: 'Update task'
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/UpdateTaskRequest'

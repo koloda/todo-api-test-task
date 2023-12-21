@@ -26,3 +26,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/tasks/{id}', [\App\Http\Controllers\TaskController::class, 'destroy']);
     Route::post('/tasks/{id}/complete', [\App\Http\Controllers\TaskController::class, 'complete']);
 });
+
+Route::get('/not-authorized', function () {
+    return response()->json(['message' => 'Not authorized'], 401);
+})->name('login');

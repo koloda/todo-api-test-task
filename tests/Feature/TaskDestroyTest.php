@@ -11,7 +11,7 @@ class TaskDestroyTest extends TestCase
         $user = \App\Models\User::factory()->create();
         $task = \App\Models\Task::factory()->create(['userId' => $user->id]);
 
-        $this->actingAs($user)->deleteJson("/api/tasks/{$task->id}")->assertStatus(200);
+        $this->actingAs($user)->deleteJson("/api/tasks/{$task->id}")->assertStatus(204);
 
         $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
     }
@@ -23,7 +23,7 @@ class TaskDestroyTest extends TestCase
         $subtask = \App\Models\Task::factory()->create(['parentId' => $task->id]);
         $secondLevelTask = \App\Models\Task::factory()->create(['parentId' => $subtask->id]);
 
-        $this->actingAs($user)->deleteJson("/api/tasks/{$task->id}")->assertStatus(200);
+        $this->actingAs($user)->deleteJson("/api/tasks/{$task->id}")->assertStatus(204);
 
         $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
         $this->assertDatabaseMissing('tasks', ['id' => $subtask->id]);
