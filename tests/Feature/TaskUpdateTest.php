@@ -43,6 +43,6 @@ class TaskUpdateTest extends TestCase
 
         $this->actingAs($user)
             ->putJson("/api/tasks/{$task->id}", $taskFields)
-            ->assertStatus(404);
+            ->assertStatus(403);
     }
 }

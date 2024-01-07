@@ -18,12 +18,13 @@ class TaskIndexTest extends TestCase
     {
         Task::query()->whereNotNull('id')->delete();
         $user = User::factory()->create();
-        Task::factory()->count(5)->create(['userId' => $user->id]);
+        Task::factory()->count(13)->create(['userId' => $user->id]);
         $secondUser = User::factory()->create();
         Task::factory()->count(5)->create(['userId' => $secondUser->id]);
 
         $this->actingAs($user)
             ->getJson('/api/tasks')
-            ->assertJsonCount(5);
+            ->assertOk()
+            ->assertJsonCount(13);
     }
 }

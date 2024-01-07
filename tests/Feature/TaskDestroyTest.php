@@ -35,7 +35,7 @@ class TaskDestroyTest extends TestCase
         $user = \App\Models\User::factory()->create();
         $task = \App\Models\Task::factory()->create();
 
-        $this->actingAs($user)->deleteJson("/api/tasks/{$task->id}")->assertStatus(404);
+        $this->actingAs($user)->deleteJson("/api/tasks/{$task->id}")->assertStatus(403);
 
         $this->assertDatabaseHas('tasks', ['id' => $task->id]);
     }

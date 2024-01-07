@@ -12,6 +12,8 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'TaskIndexRequest')]
 class TaskIndexRequest extends FormRequest
 {
+    private ?array $orderOptions;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,7 +29,11 @@ class TaskIndexRequest extends FormRequest
             'status' => ['nullable', 'string', Rule::in([TaskStatus::Todo->value, TaskStatus::Done->value])],
             'priority' => ['nullable', 'integer', 'min:1', 'max:5'],
             'text' => ['nullable', 'string', 'max:255'],
-            'order' => ['nullable', 'string'],
+            'order' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                if (!$this->validateOrder()) {
+                    $fail('Order parameter is invalid');
+                }
+            }],
         ];
     }
 
@@ -37,18 +43,27 @@ class TaskIndexRequest extends FormRequest
             ? TaskStatus::from($this->input('status'))
             : null;
 
-        if ($this->input('order')) {
-            $orderOptions = array_map(
-                fn (string $option) => TaskOrder::from($option),
-                explode(',', $this->input('order'))
-            );
-        }
-
         return new TaskIndexFilterDTO(
             status: $status,
             priority: $this->input('priority'),
             text: $this->input('text'),
-            order: $orderOptions ?? null,
+            order: $this->orderOptions ?? null,
         );
+    }
+
+    public function validateOrder(): bool
+    {
+        if ($this->input('order')) {
+            try {
+                $this->orderOptions = array_map(
+                    fn (string $option) => TaskOrder::from($option),
+                    explode(',', $this->input('order'))
+                );
+            } catch (\ValueError $e) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

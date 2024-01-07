@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Http\Requests\CreateTaskRequest;
-use App\Http\Requests\UpdateTaskRequest;
+use App\DTO\CreateTaskDTO;
+use App\DTO\UpdateTaskDTO;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
@@ -15,10 +15,8 @@ readonly class TaskService
     {
     }
 
-    public function createFromRequest(CreateTaskRequest $request, User $user): Task
+    public function create(CreateTaskDTO $payload, User $user): Task
     {
-        $payload = $request->toDTO();
-
         if ($payload->parentId) {
             $parent = $this->repository->getById($payload->parentId);
 
@@ -39,15 +37,8 @@ readonly class TaskService
         return $task;
     }
 
-    public function updateFromRequest(UpdateTaskRequest $request, User $user, int $id): Task
+    public function update(UpdateTaskDTO $payload, Task $task): Task
     {
-        $payload = $request->toDTO();
-        $task = $this->repository->getById($id);
-
-        if ($task->userId !== $user->id) {
-            abort(404);
-        }
-
         $task->title = $payload->title;
         $task->description = $payload->description;
         $task->priority = $payload->priority;
@@ -56,25 +47,13 @@ readonly class TaskService
         return $task;
     }
 
-    public function deleteById(int $id, User $user): ?bool
+    public function delete(Task $task): ?bool
     {
-        $task = $this->repository->getById($id);
-
-        if ($task->userId !== $user->id) {
-            abort(404);
-        }
-
         return $task->delete();
     }
 
-    public function completeById(int $id, User $user): Task
+    public function complete(Task $task): Task
     {
-        $task = $this->repository->getById($id);
-
-        if ($task->userId !== $user->id) {
-            abort(404);
-        }
-
         if ($task->status === TaskStatus::Done) {
             abort(400);
         }

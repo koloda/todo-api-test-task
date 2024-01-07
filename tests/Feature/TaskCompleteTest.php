@@ -99,7 +99,7 @@ class TaskCompleteTest extends TestCase
 
         $this->actingAs($user)
             ->postJson('/api/tasks/' . $task->id . '/complete')
-            ->assertStatus(404);
+            ->assertStatus(403);
 
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,

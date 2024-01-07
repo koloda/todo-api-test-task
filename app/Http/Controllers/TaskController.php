@@ -16,6 +16,18 @@ use OpenApi\Attributes as OA;
 #[OA\Server(url: '/api')]
 class TaskController extends Controller
 {
+    //add policy to controller
+    public function __construct()
+    {
+        $this->authorizeResource(Task::class, 'task');
+    }
+
+    protected function resourceAbilityMap(): array
+    {
+        return array_merge(parent::resourceAbilityMap(), [
+            'complete' => 'complete',
+        ]);
+    }
     public const TASKS_PER_PAGE = 100;
 
     #[OA\Get(path: '/tasks', summary: 'Get list of tasks', tags: ['Tasks'])]
@@ -64,16 +76,9 @@ class TaskController extends Controller
     #[OA\Get(path: '/tasks/{id}', summary: 'Get task by ID', tags: ['Tasks'])]
     #[OA\PathParameter(name: 'id', description: 'Task ID', required: true)]
     #[OA\Response(ref: '#/components/schemas/Task', response: '200', description: 'Task')]
-    public function show(TaskRepository $repository, int $id): Task
+    public function show(Task $task): Task
     {
-        $user = auth()->user();
-        $task = $repository->getById($id);
-
-        if ($task->userId !== $user->id) {
-            abort(404);
-        }
-
-        return $task;
+        return $task->load('subtasks');
     }
 
     #[OA\Post(path: '/tasks', summary: 'Create task', tags: ['Tasks'])]
@@ -81,31 +86,31 @@ class TaskController extends Controller
     #[OA\Response(ref: '#/components/schemas/Task', response: '201', description: 'Task')]
     public function store(TaskService $service, CreateTaskRequest $request): Task
     {
-        return $service->createFromRequest($request, auth()->user());
+        return $service->create($request->toDTO(), $request->user());
     }
 
     #[OA\Put(path: '/tasks/{id}', summary: 'Update task', tags: ['Tasks'])]
     #[OA\PathParameter(name: 'id', description: 'Task ID', required: true)]
     #[OA\RequestBody(ref: '#/components/requestBodies/UpdateTaskRequest')]
     #[OA\Response(ref: '#/components/schemas/Task', response: '200', description: 'Task')]
-    public function update(TaskService $service, UpdateTaskRequest $request, int $id): Task
+    public function update(TaskService $service, UpdateTaskRequest $request, Task $task): Task
     {
-        return $service->updateFromRequest($request, auth()->user(), $id);
+        return $service->update($request->toDTO(), $task);
     }
 
     #[OA\Delete(path: '/tasks/{id}', summary: 'Delete task', tags: ['Tasks'])]
     #[OA\PathParameter(name: 'id', description: 'Task ID', required: true)]
     #[OA\Response(response: '204', description: 'No content')]
-    public function destroy(TaskService $service, int $id): JsonResponse
+    public function destroy(TaskService $service, Task $task): JsonResponse
     {
-        return response()->json($service->deleteById($id, auth()->user()), 204);
+        return response()->json($service->delete($task), 204);
     }
 
     #[OA\Post(path: '/tasks/{id}/complete', summary: 'Complete task', tags: ['Tasks'])]
     #[OA\PathParameter(name: 'id', description: 'Task ID', required: true)]
     #[OA\Response(ref: '#/components/schemas/Task', response: '200', description: 'Task')]
-    public function complete(TaskService $service, int $id): Task
+    public function complete(TaskService $service, Task $task): Task
     {
-        return $service->completeById($id, auth()->user());
+        return $service->complete($task);
     }
 }

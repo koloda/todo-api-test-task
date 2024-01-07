@@ -14,7 +14,7 @@ return new class () extends Migration {
             $table->foreignId('userId')->constrained('users')->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->enum('status', [TaskStatus::Todo->value, TaskStatus::Done->value])->default(TaskStatus::Done->value);
+            $table->string('status', 10)->default(TaskStatus::Done->value);
             $table->unsignedTinyInteger('priority')->default(1);
             $table->dateTime('createdAt');
             $table->dateTime('updatedAt');

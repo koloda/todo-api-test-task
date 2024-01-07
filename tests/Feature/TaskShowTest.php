@@ -16,7 +16,9 @@ class TaskShowTest extends TestCase
         $user = User::factory()->create();
         $task = Task::factory()->create(['userId' => $user->id]);
 
-        $this->actingAs($user)->getJson("/api/tasks/{$task->id}")->assertJson([
+        $this->actingAs($user)->getJson("/api/tasks/{$task->id}")
+            ->assertOk()
+            ->assertJson([
                 'id' => $task->id,
                 'title' => $task->title,
                 'description' => $task->description,
@@ -49,7 +51,7 @@ class TaskShowTest extends TestCase
 
         $this->actingAs($user)
             ->getJson("/api/tasks/{$task->id}")
-            ->assertStatus(404);
+            ->assertStatus(403);
     }
 
     public function test_show_task_with_subtasks()
@@ -61,6 +63,7 @@ class TaskShowTest extends TestCase
 
         $this->actingAs($user)
             ->getJson("/api/tasks/{$task->id}")
+            ->assertOk()
             ->assertJson([
                 'id' => $task->id,
                 'title' => $task->title,
